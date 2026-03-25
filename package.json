@@ -1,0 +1,46 @@
+{
+    "name": "@roastery-capsules/post.post-content",
+    "description": "Post tag management capsule for the Roastery CMS ecosystem — CRUD operations with slug generation, pagination, and optional caching.",
+    "version": "0.0.1",
+    "author": {
+        "name": "Alan Reis",
+        "email": "alanreisanjo@gmail.com",
+        "url": "https://github.com/Hoyasumii"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/roastery-cms/capsules.post_post-content"
+    },
+    "typesVersions": {
+        "*": {
+            "*": [
+                "./dist/*/index.d.ts"
+            ]
+        }
+    },
+    "exports": {
+        "./*": {
+            "types": "./dist/*/index.d.ts",
+            "import": "./dist/*/index.js",
+            "require": "./dist/*/index.cjs"
+        }
+    },
+    "files": [
+        "dist"
+    ],
+    "type": "module",
+    "scripts": {
+        "build": "knip && biome check --fix && tsup 'src/**/index.ts' --format cjs,esm --dts --tsconfig tsconfig.build.json --clean",
+        "test:unit": "bun test --env-file=.env.testing",
+        "test:coverage": "bun test --env-file=.env.testing --coverage",
+        "setup": "bun run build && bun link",
+        "prepare": "husky || true",
+        "knip": "knip"
+    },
+    "devDependencies": {
+        "@types/bun": "latest"
+    },
+    "peerDependencies": {
+        "typescript": "^5"
+    }
+}
