@@ -52,6 +52,8 @@
     "dependencies": {
         "@elysiajs/eden": "^1.4.8",
         "@roastery-capsules/post.post": "^0.0.3",
+        "@roastery-capsules/post.post-tag": "^0.0.4",
+        "@roastery-capsules/post.post-type": "^0.0.3",
         "@roastery/barista": "^0.0.5",
         "@roastery/beans": "0.0.4",
         "@roastery/seedbed": "^0.0.2",

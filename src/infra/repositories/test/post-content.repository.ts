@@ -1,0 +1,56 @@
+import { PostContent } from "@/domain/post-content";
+import type { IPostContent } from "@/domain/types/post-content.interface";
+import type { IPostContentRepositor } from "@/domain/types/repositories/post-content.repository-interface";
+import { EntitySource } from "@roastery/beans/entity/symbols";
+import { ConflictException } from "@roastery/terroir/exceptions/infra";
+
+export class PostContentRepository implements IPostContentRepositor {
+    private contents: Map<string, IPostContent>;
+
+    constructor() {
+        this.contents = new Map();
+    }
+
+    async create(postContent: IPostContent): Promise<void> {
+        if (this.contents.has(postContent.id)) {
+            throw new ConflictException(PostContent[EntitySource]);
+        }
+
+        this.contents.set(postContent.id, postContent);
+    }
+
+    async findByPostId(postId: string): Promise<IPostContent | null> {
+        for (const content of this.contents.values()) {
+            if (content.post.id === postId) {
+                return content;
+            }
+        }
+        return null;
+    }
+
+    async update(postContent: IPostContent): Promise<void> {
+        if (!this.contents.has(postContent.id)) {
+            throw new Error(`PostContent com ID ${postContent.id} não encontrado`);
+        }
+
+        this.contents.set(postContent.id, postContent);
+    }
+
+    seed(contents: IPostContent[]): void {
+        for (const content of contents) {
+            this.contents.set(content.id, content);
+        }
+    }
+
+    clear(): void {
+        this.contents.clear();
+    }
+
+    getAll(): IPostContent[] {
+        return Array.from(this.contents.values());
+    }
+
+    count(): number {
+        return this.contents.size;
+    }
+}
