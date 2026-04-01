@@ -31,7 +31,6 @@ coveragePathIgnorePatterns = [
 
   # Infra repositories (prisma, cached)
   "src/infra/repositories/prisma/**",
-  "src/infra/repositories/cached/**",
 
   # Dev bootstrap (test harness, not production code)
   "src/presentation/dev/**",

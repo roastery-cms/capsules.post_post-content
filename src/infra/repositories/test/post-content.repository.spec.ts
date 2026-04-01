@@ -7,7 +7,7 @@ import { PostTag } from "@roastery-capsules/post.post-tag/domain";
 import { makeEntity } from "@roastery/beans/entity/factories";
 import type { IPost } from "@roastery-capsules/post.post/domain/types";
 import type { IPostContent } from "@/domain/types/post-content.interface";
-import { ConflictException } from "@roastery/terroir/exceptions/infra";
+import { ConflictException, ResourceNotFoundException } from "@roastery/terroir/exceptions/infra";
 
 const makePostType = () =>
 	PostType.make({ name: "Blog", schema: "{}" });
@@ -113,12 +113,12 @@ describe("PostContentRepository", () => {
 			expect(result?.content).toBe("# Updated\nNew content.");
 		});
 
-		it("should throw when updating a non-existent post content", () => {
+		it("should throw ResourceNotFoundException when updating a non-existent post content", () => {
 			const repository = new PostContentRepository();
 			const postContent = makePostContent();
 
-			expect(repository.update(postContent)).rejects.toThrow(
-				`PostContent com ID ${postContent.id} não encontrado`,
+			expect(repository.update(postContent)).rejects.toBeInstanceOf(
+				ResourceNotFoundException,
 			);
 		});
 	});

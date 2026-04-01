@@ -1,10 +1,10 @@
 import { PostContent } from "@/domain/post-content";
 import type { IPostContent } from "@/domain/types/post-content.interface";
-import type { IPostContentRepositor } from "@/domain/types/repositories/post-content.repository-interface";
+import type { IPostContentRepository } from "@/domain/types/repositories/post-content.repository-interface";
 import { EntitySource } from "@roastery/beans/entity/symbols";
-import { ConflictException } from "@roastery/terroir/exceptions/infra";
+import { ConflictException, ResourceNotFoundException } from "@roastery/terroir/exceptions/infra";
 
-export class PostContentRepository implements IPostContentRepositor {
+export class PostContentRepository implements IPostContentRepository {
     private contents: Map<string, IPostContent>;
 
     constructor() {
@@ -30,7 +30,7 @@ export class PostContentRepository implements IPostContentRepositor {
 
     async update(postContent: IPostContent): Promise<void> {
         if (!this.contents.has(postContent.id)) {
-            throw new Error(`PostContent com ID ${postContent.id} não encontrado`);
+            throw new ResourceNotFoundException(PostContent[EntitySource]);
         }
 
         this.contents.set(postContent.id, postContent);
