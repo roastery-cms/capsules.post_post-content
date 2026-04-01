@@ -72,4 +72,4 @@ export const CachedPostContentMapper = {
         const { id, createdAt, updatedAt, ...properties } = data;
         return PostType.make(properties, { id, createdAt, updatedAt });
     },
-};
+} as const;

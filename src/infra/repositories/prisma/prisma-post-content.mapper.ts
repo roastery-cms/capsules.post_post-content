@@ -46,12 +46,16 @@ export type PostContentPrismaDefaultOutput = {
     };
 };
 
-export class PrismaPostContentMapper {
-    public static run(_data: PostContentPrismaDefaultOutput): IPostContent {
+const GetPost = Symbol("PrismaPostContentMapper::GetPost");
+const GetTags = Symbol("PrismaPostContentMapper::GetTags");
+const GetType = Symbol("PrismaPostContentMapper::GetType");
+
+export const PrismaPostContentMapper = {
+    run: (_data: PostContentPrismaDefaultOutput): IPostContent => {
         const { post: _post, ..._properties } = _data;
         const data = _properties;
 
-        const post = PrismaPostContentMapper.getPost(_post);
+        const post = PrismaPostContentMapper[GetPost](_post);
 
         const {
             content,
@@ -62,15 +66,13 @@ export class PrismaPostContentMapper {
         const info = JSON.stringify(_info);
 
         return PostContent.make({ content, post, info }, properties);
-    }
+    },
 
-    private static getPost(
-        _data: PostContentPrismaDefaultOutput["post"],
-    ): IPost {
+    [GetPost]: (_data: PostContentPrismaDefaultOutput["post"]): IPost => {
         const { tags: _tags, postType: _postType, ..._properties } = _data;
 
-        const tags = PrismaPostContentMapper.getPostTags(_tags);
-        const type = PrismaPostContentMapper.getPostType(_postType);
+        const tags = PrismaPostContentMapper[GetTags](_tags);
+        const type = PrismaPostContentMapper[GetType](_postType);
 
         const { name, cover, description, slug, ...properties } =
             parsePrismaDateTimeToISOString(_properties);
@@ -79,25 +81,25 @@ export class PrismaPostContentMapper {
             { tags, type, name, description, cover, slug },
             properties,
         );
-    }
+    },
 
-    private static getPostTags(
+    [GetTags]: (
         data: PostContentPrismaDefaultOutput["post"]["tags"],
-    ): IPostTag[] {
+    ): IPostTag[] => {
         return data.map((tag) => {
             const { name, hidden, slug, ...properties } =
                 parsePrismaDateTimeToISOString(tag);
 
             return PostTag.make({ name, hidden, slug }, properties);
         });
-    }
+    },
 
-    private static getPostType(
+    [GetType]: (
         data: PostContentPrismaDefaultOutput["post"]["postType"],
-    ): IPostType {
+    ): IPostType => {
         const { isHighlighted, name, schema, slug, ...properties } =
             parsePrismaDateTimeToISOString(data);
 
         return PostType.make({ isHighlighted, name, schema, slug }, properties);
-    }
-}
+    },
+};
