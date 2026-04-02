@@ -1,0 +1,303 @@
+// Barista Imports
+import { barista } from "@roastery/barista";
+
+// Terroir Imports
+import { UnknownException } from "@roastery/terroir/exceptions";
+
+// Adapter Imports
+import { cache } from "@roastery-adapters/cache";
+import { CacheEnvDependenciesDTO } from "@roastery-adapters/cache/dtos";
+import { postAdapter as baristaPostAdapter } from "@roastery-adapters/post/plugins";
+
+// Basic Capsules Imports
+import { baristaApiDocs } from "@roastery-capsules/api-docs";
+import { baristaErrorHandler } from "@roastery-capsules/api-error-handler";
+import { baristaResponseMapper } from "@roastery-capsules/api-response-mapper";
+
+// Auth Capsule Imports
+import { AuthEnvDependenciesDTO } from "@roastery-capsules/auth/dtos";
+import { GetAccessController } from "@roastery-capsules/auth/plugins/controllers";
+import BaristaAuthTags from "@roastery-capsules/auth/plugins/tags";
+import { baristaEnv } from "@roastery-capsules/env";
+
+// Post Imports
+import type {
+	IPostRepository,
+	IPostTagRepository as IPostTagRepositoryForPost,
+	IPostTypeRepository as IPostTypeRepositoryForPost,
+} from "@roastery-capsules/post.post/domain/types/repositories";
+import { PostDependenciesDTO } from "@roastery-capsules/post.post/infra/dependencies";
+import {
+	makePostRepository,
+	makePostTagRepository as makePostTagRepositoryForPost,
+	makePostTypeRepository as makePostTypeRepositoryForPost,
+} from "@roastery-capsules/post.post/infra/factories/repositories";
+import { PostRepositoryPlugin } from "@roastery-capsules/post.post/presentation/plugins";
+import { PostRoutes } from "@roastery-capsules/post.post/presentation/routes";
+import PostTags from "@roastery-capsules/post.post/presentation/tags";
+
+// PostTag Imports
+import type { IPostTagRepository } from "@roastery-capsules/post.post-tag/domain/types";
+import { PostTagDependenciesDTO } from "@roastery-capsules/post.post-tag/infra/dependencies";
+import { makePostTagRepository } from "@roastery-capsules/post.post-tag/infra/factories/repositories";
+import { PostTagRepositoryPlugin } from "@roastery-capsules/post.post-tag/presentation/plugins";
+import { PostTagRoutes } from "@roastery-capsules/post.post-tag/presentation/routes";
+import PostTagTags from "@roastery-capsules/post.post-tag/presentation/tags";
+
+// PostType Imports
+import type { IPostTypeRepository } from "@roastery-capsules/post.post-type/domain/types";
+import { PostTypeDependenciesDTO } from "@roastery-capsules/post.post-type/infra/dependencies";
+import { makePostTypeRepository } from "@roastery-capsules/post.post-type/infra/factories/repositories";
+import { PostTypeRepositoryPlugin } from "@roastery-capsules/post.post-type/presentation/plugins";
+import { PostTypeRoutes } from "@roastery-capsules/post.post-type/presentation/routes";
+import PostTypeTags from "@roastery-capsules/post.post-type/presentation/tags";
+
+// PostContent Imports
+import type {
+	IPostContentRepository,
+	IPostRepository as IPostRepositoryForPostContent,
+} from "@/domain/types/repositories";
+import { PostContentDependenciesDTO } from "@/infra/dependencies";
+import {
+	makePostContentRepository,
+	makePostRepository as makePostRepositoryForPostContent,
+} from "@/infra/factories/repositories";
+import { PostContentRepositoryPlugin } from "@/presentation/plugins";
+import { PostContentRoutes } from "@/presentation/routes";
+import { PostContentTags } from "@/presentation/tags";
+
+export async function bootstrap(open: boolean = false) {
+	const app = barista({ name: "@roastery" })
+		.use(
+			baristaEnv(
+				CacheEnvDependenciesDTO,
+				AuthEnvDependenciesDTO,
+				PostDependenciesDTO,
+				PostTagDependenciesDTO,
+				PostTypeDependenciesDTO,
+				PostContentDependenciesDTO,
+			),
+		)
+		.use(baristaErrorHandler)
+		.use(baristaResponseMapper)
+		.use((app) => {
+			const { CACHE_PROVIDER, REDIS_URL } = app.decorator.env;
+
+			return app.use(cache({ CACHE_PROVIDER, REDIS_URL }));
+		});
+
+	const { env } = app.decorator;
+	const {
+		AUTH_EMAIL,
+		AUTH_PASSWORD,
+		JWT_SECRET,
+		DATABASE_URL,
+		DATABASE_PROVIDER,
+		PORT,
+		NODE_ENV,
+		CACHE_PROVIDER,
+		REDIS_URL,
+		POST_TAG_BASE_URL,
+		POST_TYPE_BASE_URL,
+		POST_BASE_URL,
+	} = env;
+
+	const postTagRepositoryForPost: IPostTagRepositoryForPost =
+		makePostTagRepositoryForPost({
+			baseUrl: POST_TAG_BASE_URL ?? `http://localhost:${PORT}`,
+			target: POST_TAG_BASE_URL ? "API" : "MEMORY",
+		});
+	const postTypeRepositoryForPost: IPostTypeRepositoryForPost =
+		makePostTypeRepositoryForPost({
+			baseUrl: POST_TYPE_BASE_URL ?? `http://localhost:${PORT}`,
+			target: POST_TYPE_BASE_URL ? "API" : "MEMORY",
+		});
+	const postRepositoryForPostContent: IPostRepositoryForPostContent =
+		makePostRepositoryForPostContent({
+			baseUrl: POST_BASE_URL ?? `http://localhost:${PORT}`,
+			target: POST_BASE_URL ? "API" : "MEMORY",
+		});
+
+	let postTagRepository: IPostTagRepository;
+	let postTypeRepository: IPostTypeRepository;
+	let postRepository: IPostRepository;
+	let postContentRepository: IPostContentRepository;
+
+	if (DATABASE_URL && DATABASE_PROVIDER === "PRISMA") {
+		const postAdapter = await baristaPostAdapter(DATABASE_URL);
+
+		app.use(postAdapter).use((app) => {
+			const { postPrismaClient: prismaClient, cache } = app.decorator;
+
+			postTagRepository = makePostTagRepository({
+				cache,
+				prismaClient,
+				target: DATABASE_PROVIDER,
+			});
+
+			postTypeRepository = makePostTypeRepository({
+				cache,
+				prismaClient,
+				target: DATABASE_PROVIDER,
+			});
+
+			postRepository = makePostRepository({
+				cache,
+				prismaClient,
+				target: DATABASE_PROVIDER,
+			});
+
+			postContentRepository = makePostContentRepository({
+				cache,
+				prismaClient,
+				target: DATABASE_PROVIDER,
+			});
+
+			return app
+				.use(PostTagRepositoryPlugin(postTagRepository))
+				.use(PostTypeRepositoryPlugin(postTypeRepository))
+				.use(
+					PostRepositoryPlugin(
+						postRepository,
+						postTagRepositoryForPost,
+						postTypeRepositoryForPost,
+					),
+				)
+				.use(
+					PostContentRepositoryPlugin(
+						postContentRepository,
+						postRepositoryForPostContent,
+					),
+				);
+		});
+	} else {
+		app.use((app) => {
+			const { cache } = app.decorator;
+
+			postTagRepository = makePostTagRepository({
+				cache,
+				target: "MEMORY",
+			});
+
+			postTypeRepository = makePostTypeRepository({
+				cache,
+				target: "MEMORY",
+			});
+
+			postRepository = makePostRepository({
+				cache,
+				target: "MEMORY",
+			});
+
+			postContentRepository = makePostContentRepository({
+				cache,
+				target: "MEMORY",
+			});
+
+			return app
+				.use(PostTagRepositoryPlugin(postTagRepository))
+				.use(PostTypeRepositoryPlugin(postTypeRepository))
+				.use(
+					PostRepositoryPlugin(
+						postRepository,
+						postTagRepositoryForPost,
+						postTypeRepositoryForPost,
+					),
+				)
+				.use(
+					PostContentRepositoryPlugin(
+						postContentRepository,
+						postRepositoryForPostContent,
+					),
+				);
+		});
+	}
+
+	if (!postRepository!) throw new UnknownException();
+	if (!postTagRepository!) throw new UnknownException();
+	if (!postTypeRepository!) throw new UnknownException();
+	if (!postContentRepository!) throw new UnknownException();
+
+	return app
+		.use(
+			GetAccessController({
+				AUTH_EMAIL,
+				AUTH_PASSWORD,
+				JWT_SECRET,
+				CACHE_PROVIDER,
+				REDIS_URL,
+			}),
+		)
+		.use((app) => {
+			const { env } = app.decorator;
+			const { CACHE_PROVIDER, JWT_SECRET, REDIS_URL } = env;
+			return app
+				.use(
+					PostTagRoutes({
+						cacheProvider: CACHE_PROVIDER,
+						jwtSecret: JWT_SECRET,
+						repository: postTagRepository,
+						redisUrl: REDIS_URL,
+					}),
+				)
+				.use(
+					PostTypeRoutes({
+						cacheProvider: CACHE_PROVIDER,
+						jwtSecret: JWT_SECRET,
+						redisUrl: REDIS_URL,
+						repository: postTypeRepository,
+					}),
+				)
+				.use(
+					PostRoutes({
+						cacheProvider: CACHE_PROVIDER,
+						jwtSecret: JWT_SECRET,
+						postRepository,
+						postTagRepository: postTagRepositoryForPost,
+						postTypeRepository: postTypeRepositoryForPost,
+						redisUrl: REDIS_URL,
+					}),
+				)
+				.use(
+					PostContentRoutes({
+						cacheProvider: CACHE_PROVIDER,
+						jwtSecret: JWT_SECRET,
+						postRepository: postRepositoryForPostContent,
+						postContentRepository,
+						redisUrl: REDIS_URL,
+					}),
+				);
+		})
+		.use(
+			baristaApiDocs(NODE_ENV === "DEVELOPMENT", `http://localhost:${PORT}`, {
+				info: {
+					title: "Roastery",
+					version: "1.0",
+					contact: {
+						email: "alanreisanjo@gmail.com",
+						name: "Alan Reis",
+						url: "https://hoyasumii.dev",
+					},
+					description:
+						"A RESTful API for managing Post Types within the Roastery CMS platform. This microservice is responsible for creating, retrieving, updating, and deleting Post Types, handling global uniqueness through slugs, schema management for diverse content structures, and toggleable highlight states.",
+				},
+				tags: [
+					BaristaAuthTags,
+					PostTagTags,
+					PostTypeTags,
+					PostTags,
+					PostContentTags,
+				],
+			}),
+		)
+		.use((app) => {
+			if (open) {
+				app.listen(app.decorator.env.PORT, () => {
+					console.log(
+						`☕️ Server is running at: http://localhost:${app.decorator.env.PORT}`,
+					);
+				});
+			}
+			return app;
+		});
+}

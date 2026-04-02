@@ -1,8 +1,8 @@
 import { ValueObject } from "@roastery/beans";
 import type { IValueObjectMetadata } from "@roastery/beans/value-object/types";
 import type { t } from "@roastery/terroir";
-import { type Schema, SchemaManager } from "@roastery/terroir/schema";
 import { InvalidPropertyException } from "@roastery/terroir/exceptions/domain";
+import { type Schema, SchemaManager } from "@roastery/terroir/schema";
 
 export class ValidInfoVO extends ValueObject<
 	Record<string, unknown>,

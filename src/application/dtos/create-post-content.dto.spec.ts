@@ -1,7 +1,7 @@
 import { describe, expect, it } from "bun:test";
+import { generateUUID } from "@roastery/beans/entity/helpers";
 import { Schema } from "@roastery/terroir/schema";
 import { CreatePostContentDTO } from "./create-post-content.dto";
-import { generateUUID } from "@roastery/beans/entity/helpers";
 
 describe("CreatePostContentDTO", () => {
 	const validator = new Schema(CreatePostContentDTO);

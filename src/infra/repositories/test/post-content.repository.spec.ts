@@ -1,16 +1,18 @@
 import { describe, expect, it } from "bun:test";
-import { PostContentRepository } from "./post-content.repository";
-import { PostContent } from "@/domain/post-content";
-import { Post } from "@roastery-capsules/post.post/domain";
-import { PostType } from "@roastery-capsules/post.post-type/domain";
-import { PostTag } from "@roastery-capsules/post.post-tag/domain";
 import { makeEntity } from "@roastery/beans/entity/factories";
+import {
+	ConflictException,
+	ResourceNotFoundException,
+} from "@roastery/terroir/exceptions/infra";
+import { Post } from "@roastery-capsules/post.post/domain";
 import type { IPost } from "@roastery-capsules/post.post/domain/types";
+import { PostTag } from "@roastery-capsules/post.post-tag/domain";
+import { PostType } from "@roastery-capsules/post.post-type/domain";
+import { PostContent } from "@/domain/post-content";
 import type { IPostContent } from "@/domain/types/post-content.interface";
-import { ConflictException, ResourceNotFoundException } from "@roastery/terroir/exceptions/infra";
+import { PostContentRepository } from "./post-content.repository";
 
-const makePostType = () =>
-	PostType.make({ name: "Blog", schema: "{}" });
+const makePostType = () => PostType.make({ name: "Blog", schema: "{}" });
 
 const makePost = (entityProps = makeEntity()): IPost =>
 	Post.make(
@@ -127,7 +129,11 @@ describe("PostContentRepository", () => {
 		it("should add multiple post contents", () => {
 			const repository = new PostContentRepository();
 
-			repository.seed([makePostContent(), makePostContent(), makePostContent()]);
+			repository.seed([
+				makePostContent(),
+				makePostContent(),
+				makePostContent(),
+			]);
 
 			expect(repository.count()).toBe(3);
 		});

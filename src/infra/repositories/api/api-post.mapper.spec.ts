@@ -1,9 +1,9 @@
 import { describe, expect, it } from "bun:test";
-import { ApiPostMapper } from "./api-post.mapper";
-import { Post } from "@roastery-capsules/post.post/domain";
-import { PostType } from "@roastery-capsules/post.post-type/domain";
-import { PostTag } from "@roastery-capsules/post.post-tag/domain";
 import { makeEntity } from "@roastery/beans/entity/factories";
+import { Post } from "@roastery-capsules/post.post/domain";
+import { PostTag } from "@roastery-capsules/post.post-tag/domain";
+import { PostType } from "@roastery-capsules/post.post-type/domain";
+import { ApiPostMapper } from "./api-post.mapper";
 
 const typeEntity = makeEntity();
 const tagEntity = makeEntity();
@@ -124,5 +124,4 @@ describe("ApiPostMapper", () => {
 
 		expect(result.updatedAt).toBe(updatedAt);
 	});
-
 });

@@ -1,14 +1,13 @@
 import { describe, expect, it } from "bun:test";
-import { FindPostService } from "./find-post.service";
-import { PostRepository } from "@/infra/repositories/test/post.repository";
-import { Post } from "@roastery-capsules/post.post/domain";
-import { PostType } from "@roastery-capsules/post.post-type/domain";
-import { PostTag } from "@roastery-capsules/post.post-tag/domain";
 import { makeEntity } from "@roastery/beans/entity/factories";
 import { ResourceNotFoundException } from "@roastery/terroir/exceptions/application";
+import { Post } from "@roastery-capsules/post.post/domain";
+import { PostTag } from "@roastery-capsules/post.post-tag/domain";
+import { PostType } from "@roastery-capsules/post.post-type/domain";
+import { PostRepository } from "@/infra/repositories/test/post.repository";
+import { FindPostService } from "./find-post.service";
 
-const makePostType = () =>
-	PostType.make({ name: "Blog", schema: "{}" });
+const makePostType = () => PostType.make({ name: "Blog", schema: "{}" });
 
 const makePost = (entityProps = makeEntity()) =>
 	Post.make(

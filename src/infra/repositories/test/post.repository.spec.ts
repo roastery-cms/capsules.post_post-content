@@ -1,13 +1,12 @@
 import { describe, expect, it } from "bun:test";
-import { PostRepository } from "./post.repository";
-import { Post } from "@roastery-capsules/post.post/domain";
-import { PostType } from "@roastery-capsules/post.post-type/domain";
-import { PostTag } from "@roastery-capsules/post.post-tag/domain";
 import { makeEntity } from "@roastery/beans/entity/factories";
+import { Post } from "@roastery-capsules/post.post/domain";
 import type { IPost } from "@roastery-capsules/post.post/domain/types";
+import { PostTag } from "@roastery-capsules/post.post-tag/domain";
+import { PostType } from "@roastery-capsules/post.post-type/domain";
+import { PostRepository } from "./post.repository";
 
-const makePostType = () =>
-	PostType.make({ name: "Blog", schema: "{}" });
+const makePostType = () => PostType.make({ name: "Blog", schema: "{}" });
 
 const makePost = (entityProps = makeEntity()): IPost =>
 	Post.make(

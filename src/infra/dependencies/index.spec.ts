@@ -20,7 +20,9 @@ describe("PostContentDependenciesDTO", () => {
 	});
 
 	it("should validate when only DATABASE_URL is provided", () => {
-		expect(validator.match({ DATABASE_URL: "postgresql://localhost:5432/db" })).toBe(true);
+		expect(
+			validator.match({ DATABASE_URL: "postgresql://localhost:5432/db" }),
+		).toBe(true);
 	});
 
 	it("should validate when only DATABASE_PROVIDER is provided", () => {
@@ -28,7 +30,9 @@ describe("PostContentDependenciesDTO", () => {
 	});
 
 	it("should validate when only POST_BASE_URL is provided", () => {
-		expect(validator.match({ POST_BASE_URL: "https://example.com" })).toBe(true);
+		expect(validator.match({ POST_BASE_URL: "https://example.com" })).toBe(
+			true,
+		);
 	});
 
 	it("should invalidate when DATABASE_URL is not a string", () => {

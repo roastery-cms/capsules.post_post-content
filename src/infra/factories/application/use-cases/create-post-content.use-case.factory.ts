@@ -1,6 +1,13 @@
 import { CreatePostContentUseCase } from "@/application/use-cases";
-import type { IPostContentReader, IPostContentWriter, IPostRepository } from "@/domain/types/repositories";
-import { makeFindPostService, makePostContentUniquenessCheckerService } from "../services";
+import type {
+	IPostContentReader,
+	IPostContentWriter,
+	IPostRepository,
+} from "@/domain/types/repositories";
+import {
+	makeFindPostService,
+	makePostContentUniquenessCheckerService,
+} from "../services";
 
 export function makeCreatePostContentUseCase(
 	writer: IPostContentWriter,

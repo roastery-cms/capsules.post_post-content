@@ -1,17 +1,22 @@
 import { describe, expect, it } from "bun:test";
-import { CreatePostContentUseCase } from "./create-post-content.use-case";
-import { PostContentUniquenessCheckerService, FindPostService } from "../services";
-import { PostContentRepository } from "@/infra/repositories/test/post-content.repository";
-import { PostRepository } from "@/infra/repositories/test/post.repository";
-import { PostContent } from "@/domain/post-content";
-import { Post } from "@roastery-capsules/post.post/domain";
-import { PostType } from "@roastery-capsules/post.post-type/domain";
-import { PostTag } from "@roastery-capsules/post.post-tag/domain";
 import { makeEntity } from "@roastery/beans/entity/factories";
-import { ResourceAlreadyExistsException, ResourceNotFoundException } from "@roastery/terroir/exceptions/application";
+import {
+	ResourceAlreadyExistsException,
+	ResourceNotFoundException,
+} from "@roastery/terroir/exceptions/application";
+import { Post } from "@roastery-capsules/post.post/domain";
+import { PostTag } from "@roastery-capsules/post.post-tag/domain";
+import { PostType } from "@roastery-capsules/post.post-type/domain";
+import { PostContent } from "@/domain/post-content";
+import { PostRepository } from "@/infra/repositories/test/post.repository";
+import { PostContentRepository } from "@/infra/repositories/test/post-content.repository";
+import {
+	FindPostService,
+	PostContentUniquenessCheckerService,
+} from "../services";
+import { CreatePostContentUseCase } from "./create-post-content.use-case";
 
-const makePostType = () =>
-	PostType.make({ name: "Blog", schema: "{}" });
+const makePostType = () => PostType.make({ name: "Blog", schema: "{}" });
 
 const makePost = (entityProps = makeEntity()) =>
 	Post.make(
@@ -28,9 +33,15 @@ const makePost = (entityProps = makeEntity()) =>
 const makeUseCase = () => {
 	const postContentRepository = new PostContentRepository();
 	const postRepository = new PostRepository();
-	const uniquenessChecker = new PostContentUniquenessCheckerService(postContentRepository);
+	const uniquenessChecker = new PostContentUniquenessCheckerService(
+		postContentRepository,
+	);
 	const findPost = new FindPostService(postRepository);
-	const useCase = new CreatePostContentUseCase(postContentRepository, uniquenessChecker, findPost);
+	const useCase = new CreatePostContentUseCase(
+		postContentRepository,
+		uniquenessChecker,
+		findPost,
+	);
 
 	return { useCase, postContentRepository, postRepository };
 };

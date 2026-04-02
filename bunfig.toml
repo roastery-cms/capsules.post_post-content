@@ -29,16 +29,16 @@ coveragePathIgnorePatterns = [
   "vendor/**",
   "third-party/**",
 
-  # Infra repositories (prisma)
-  "src/infra/repositories/prisma/**",
-
   # Dev bootstrap (test harness, not production code)
-  "src/presentation/dev/**",
+  "src/presentation/server/**",
 
   # Utilities that don't need testing
   "src/utils/constants.ts",
   "src/types/**",
 
-  "**/dist/**/*.js"
+  "**/dist/**/*.js",
+  "src/infra/repositories/prisma/post-content.repository.ts",
+  "src/infra/repositories/api/post.repository.ts",
+  "src/infra/factories/repositories/post.repository.factory.ts"
 ]
 coverageIgnoreSourcemaps = true

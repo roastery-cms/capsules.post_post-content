@@ -1,6 +1,6 @@
 import { describe, expect, it } from "bun:test";
-import { UnpackedPostContentSchema } from "./unpacked-post-content.schema";
 import { generateUUID } from "@roastery/beans/entity/helpers";
+import { UnpackedPostContentSchema } from "./unpacked-post-content.schema";
 
 describe("UnpackedPostContentSchema", () => {
 	const makeValidPostTag = () => ({

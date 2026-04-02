@@ -1,12 +1,12 @@
 import { describe, expect, it } from "bun:test";
+import { makeEntity } from "@roastery/beans/entity/factories";
+import { t } from "@roastery/terroir";
+import { InvalidPropertyException } from "@roastery/terroir/exceptions/domain";
+import type { IPost } from "@roastery-capsules/post.post/domain/types";
+import type { IPostTag } from "@roastery-capsules/post.post-tag/domain/types";
+import type { IPostType } from "@roastery-capsules/post.post-type/domain/types";
 import { PostContent } from "./post-content";
 import type { IConstructorPostContent } from "./types";
-import type { IPost } from "@roastery-capsules/post.post/domain/types";
-import type { IPostType } from "@roastery-capsules/post.post-type/domain/types";
-import type { IPostTag } from "@roastery-capsules/post.post-tag/domain/types";
-import { t } from "@roastery/terroir";
-import { makeEntity } from "@roastery/beans/entity/factories";
-import { InvalidPropertyException } from "@roastery/terroir/exceptions/domain";
 
 const infoSchema = JSON.stringify(
 	t.Object({

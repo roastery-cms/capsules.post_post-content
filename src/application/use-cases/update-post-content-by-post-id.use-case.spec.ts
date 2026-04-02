@@ -1,16 +1,15 @@
 import { describe, expect, it } from "bun:test";
-import { UpdatePostContentByPostIdUseCase } from "./update-post-content-by-post-id.use-case";
-import { FindPostContentByPostIdUseCase } from "./find-post-content-by-post-id.use-case";
-import { PostContentRepository } from "@/infra/repositories/test/post-content.repository";
-import { PostContent } from "@/domain/post-content";
-import { Post } from "@roastery-capsules/post.post/domain";
-import { PostType } from "@roastery-capsules/post.post-type/domain";
-import { PostTag } from "@roastery-capsules/post.post-tag/domain";
 import { makeEntity } from "@roastery/beans/entity/factories";
 import { ResourceNotFoundException } from "@roastery/terroir/exceptions/application";
+import { Post } from "@roastery-capsules/post.post/domain";
+import { PostTag } from "@roastery-capsules/post.post-tag/domain";
+import { PostType } from "@roastery-capsules/post.post-type/domain";
+import { PostContent } from "@/domain/post-content";
+import { PostContentRepository } from "@/infra/repositories/test/post-content.repository";
+import { FindPostContentByPostIdUseCase } from "./find-post-content-by-post-id.use-case";
+import { UpdatePostContentByPostIdUseCase } from "./update-post-content-by-post-id.use-case";
 
-const makePostType = () =>
-	PostType.make({ name: "Blog", schema: "{}" });
+const makePostType = () => PostType.make({ name: "Blog", schema: "{}" });
 
 const makePost = (entityProps = makeEntity()) =>
 	Post.make(
@@ -27,7 +26,10 @@ const makePost = (entityProps = makeEntity()) =>
 const makeUseCase = () => {
 	const repository = new PostContentRepository();
 	const findPostContent = new FindPostContentByPostIdUseCase(repository);
-	const useCase = new UpdatePostContentByPostIdUseCase(repository, findPostContent);
+	const useCase = new UpdatePostContentByPostIdUseCase(
+		repository,
+		findPostContent,
+	);
 
 	return { useCase, repository };
 };
