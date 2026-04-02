@@ -1,6 +1,24 @@
 {
 	"name": "@roastery-capsules/post.post-content",
-	"description": "Post tag management capsule for the Roastery CMS ecosystem — CRUD operations with slug generation, pagination, and optional caching.",
+	"description": "Post content management capsule for the Roastery CMS ecosystem — content body and schema-validated JSON metadata with optional caching.",
+	"license": "MIT",
+	"keywords": [
+		"roastery",
+		"cms",
+		"post-content",
+		"capsule",
+		"clean-architecture",
+		"elysia",
+		"bun",
+		"prisma",
+		"redis",
+		"cache",
+		"rest-api",
+		"ddd",
+		"cookie-auth",
+		"jwt",
+		"framework"
+	],
 	"version": "0.0.1",
 	"author": {
 		"name": "Alan Reis",
@@ -11,6 +29,9 @@
 		"type": "git",
 		"url": "https://github.com/roastery-cms/capsules.post_post-content"
 	},
+	"main": "./dist/index.cjs",
+	"module": "./dist/index.js",
+	"types": "./dist/index.d.ts",
 	"typesVersions": {
 		"*": {
 			"*": [
@@ -19,6 +40,11 @@
 		}
 	},
 	"exports": {
+		".": {
+			"types": "./dist/index.d.ts",
+			"import": "./dist/index.js",
+			"require": "./dist/index.cjs"
+		},
 		"./*": {
 			"types": "./dist/*/index.d.ts",
 			"import": "./dist/*/index.js",
@@ -33,6 +59,7 @@
 		"build": "knip && biome check --fix && tsup 'src/**/index.ts' --format cjs,esm --dts --tsconfig tsconfig.build.json --clean",
 		"test:unit": "bun test --env-file=.env.testing",
 		"test:coverage": "bun test --env-file=.env.testing --coverage",
+		"start:dev": "bun --watch --env-file=.env ./src/presentation/server/dev/index.mts",
 		"setup": "bun run build && bun link",
 		"prepare": "husky || true",
 		"knip": "knip"

@@ -1,21 +1,22 @@
-# @roastery-capsules/post.post-tag
+# @roastery-capsules/post.post-content
 
-Post tag management capsule for the [Roastery CMS](https://github.com/roastery-cms) ecosystem.
+Post content management capsule for the [Roastery CMS](https://github.com/roastery-cms) ecosystem.
 
 [![Checked with Biome](https://img.shields.io/badge/Checked_with-Biome-60a5fa?style=flat&logo=biome)](https://biomejs.dev)
 
 ## Overview
 
-**@roastery-capsules/post.post-tag** is an [Elysia](https://elysiajs.com) capsule that provides full CRUD management for post tags, including automatic slug generation, uniqueness validation, pagination, and optional Redis caching.
+**@roastery-capsules/post.post-content** is an [Elysia](https://elysiajs.com) capsule that manages the rich content associated with a post — a Markdown body and a JSON metadata field (`info`) validated at runtime against the post type's schema.
 
-It exposes `PostTagRoutes`, an Elysia plugin ready to be mounted in your application, with the following endpoints:
+Each post has at most one content record (one-to-one relationship), and uniqueness is enforced on creation.
+
+It exposes `PostContentRoutes`, an Elysia plugin ready to be mounted in your application, with the following endpoints:
 
 | Method | Path | Auth | Description |
 |--------|------|------|-------------|
-| `POST` | `/post-tags/` | Required | Create a new tag |
-| `GET` | `/post-tags/` | Public | List tags (paginated) |
-| `GET` | `/post-tags/:id-or-slug` | Public | Get tag by ID or slug |
-| `PATCH` | `/post-tags/:id-or-slug` | Required | Update a tag |
+| `POST` | `/post-contents/` | Required | Create content for a post |
+| `GET` | `/post-contents/:postId` | Public | Get content by post ID |
+| `PATCH` | `/post-contents/:postId` | Required | Update content of a post |
 
 ## Technologies
 
@@ -26,9 +27,10 @@ It exposes `PostTagRoutes`, an Elysia plugin ready to be mounted in your applica
 | [@roastery/terroir](https://github.com/roastery-cms) | Runtime schema validation and exception handling |
 | [@roastery/beans](https://github.com/roastery-cms) | Domain entity base class |
 | [@roastery/seedbed](https://github.com/roastery-cms) | Repository and use-case contracts |
-| [@roastery-adapters/post](https://github.com/roastery-cms) | Prisma post tag repository adapter |
+| [@roastery-adapters/post](https://github.com/roastery-cms) | Prisma post content repository adapter |
 | [@roastery-adapters/cache](https://github.com/roastery-cms) | Redis caching adapter |
 | [@roastery-capsules/auth](https://github.com/roastery-cms) | Authentication plugin |
+| [@elysiajs/eden](https://elysiajs.com/eden/overview) | Type-safe cross-capsule API client |
 | [Prisma](https://www.prisma.io) | ORM for data persistence |
 | [tsup](https://tsup.egoist.dev) | Bundling to ESM + CJS with `.d.ts` generation |
 | [Bun](https://bun.sh) | Runtime, test runner, and package manager |
@@ -38,7 +40,7 @@ It exposes `PostTagRoutes`, an Elysia plugin ready to be mounted in your applica
 ## Installation
 
 ```bash
-bun add @roastery-capsules/post.post-tag
+bun add @roastery-capsules/post.post-content
 ```
 
 **Peer dependencies** (install alongside):
@@ -53,62 +55,57 @@ bun add @types/bun tsup typescript
 
 ```typescript
 import { Elysia } from 'elysia';
-import { PostTagRoutes } from '@roastery-capsules/post.post-tag/presentation';
+import { PostContentRoutes } from '@roastery-capsules/post.post-content/presentation';
 
 const app = new Elysia()
-  .use(PostTagRoutes())
+  .use(PostContentRoutes({ /* repositories */ }))
   .listen(3000);
 ```
 
-### Tag entity
+### PostContent entity
 
-Each `PostTag` has the following properties:
+Each `PostContent` has the following properties:
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `name` | `string` | Display name |
-| `slug` | `string` | URL-friendly identifier (auto-generated if omitted) |
-| `hidden` | `boolean` | Visibility flag (default: `false`) |
+| `post` | `IPost` | Reference to the parent post |
+| `content` | `string` | Body content, typically Markdown |
+| `info` | `string` | JSON metadata validated against the post type schema |
 
-### Creating a tag
+### Creating content
 
 ```http
-POST /post-tags/
+POST /post-contents/
 Content-Type: application/json
 Authorization: Bearer <token>
 
 {
-  "name": "TypeScript",
-  "slug": "typescript",   // optional — auto-generated from name if omitted
-  "hidden": false         // optional
+  "postId": "<uuid>",
+  "content": "# Hello World\n\nThis is my first post.",
+  "info": "{\"key\": \"value\"}"
 }
 ```
 
-### Listing tags
+### Getting content by post ID
 
 ```http
-GET /post-tags/?page=1&limit=10
+GET /post-contents/<postId>
 ```
 
-### Getting a tag by ID or slug
+### Updating content
 
 ```http
-GET /post-tags/typescript
-GET /post-tags/<uuid>
-```
-
-### Updating a tag
-
-```http
-PATCH /post-tags/typescript
+PATCH /post-contents/<postId>
 Content-Type: application/json
 Authorization: Bearer <token>
 
 {
-  "name": "TypeScript 5",
-  "hidden": true
+  "content": "# Updated content",
+  "info": "{\"key\": \"new-value\"}"
 }
 ```
+
+Both `content` and `info` are optional on update — send only the fields you want to change.
 
 ---
 
